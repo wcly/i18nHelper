@@ -28,7 +28,6 @@ object MapUtils {
         val jsonObject = JSONObject(
             jsonString.trim()
                 .removeSurrounding("```json", "```")
-                .replace("\'", "\\\'")
         )
         return jsonObject.toMap()
     }
