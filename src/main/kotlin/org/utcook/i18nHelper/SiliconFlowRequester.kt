@@ -1,9 +1,9 @@
 package org.utcook.i18nHelper
 
+import com.google.gson.Gson
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -16,6 +16,7 @@ class SiliconFlowRequester(private val token: String) {
         .build()
 
     private val apiUrl = "https://api.siliconflow.cn/v1/chat/completions"
+    private val gson = Gson() // 初始化 Gson 实例
 
     /**
      * 发送请求到 SiliconFlow API。
@@ -138,10 +139,12 @@ class SiliconFlowRequester(private val token: String) {
                                 break
                             }
                             try {
-                                // 提取消息内容并回调
-                                val message = JSONObject(data).getJSONArray("choices")
-                                    .getJSONObject(0).getJSONObject("delta").optString("content", "")
-                                
+                                // 使用.Gson 解析 JSON 数据
+                                val jsonResponse = gson.fromJson(data, Map::class.java)
+                                val choices = jsonResponse["choices"] as? List<*>
+                                val delta = choices?.get(0)?.let { it as? Map<*, *> }?.get("delta") as? Map<*, *>
+                                val message = delta?.get("content") as? String ?: ""
+
                                 // 过滤掉仅包含换行符的消息
                                 if (message.trim().isNotEmpty()) {
                                     onMessage(message)

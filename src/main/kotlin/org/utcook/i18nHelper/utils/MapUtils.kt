@@ -1,6 +1,7 @@
 package org.utcook.i18nHelper.utils
 
-import org.json.JSONObject
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 object MapUtils {
 
@@ -12,10 +13,7 @@ object MapUtils {
      * @return 包含 map1 中存在但 map2 中不存在的键值对的新 Map
      */
     fun <K, V> getDifferenceByKey(map1: Map<K, V>, map2: Map<K, V>): Map<K, V> {
-        // 找出 map1 中存在但 map2 中不存在的键
-        return map1.filterKeys { key ->
-            key !in map2
-        }
+        return map1.filterKeys { key -> key !in map2 }
     }
 
     /**
@@ -25,11 +23,12 @@ object MapUtils {
      * @return 转换后的 Map。
      */
     fun jsonToMap(jsonString: String): Map<String, Any?> {
-        val jsonObject = JSONObject(
-            jsonString.trim()
-                .removeSurrounding("```json", "```")
+        val gson = Gson()
+        val typeToken = object : TypeToken<Map<String, Any?>>() {}.type
+        return gson.fromJson(
+            jsonString.trim().removeSurrounding("```json", "```"),
+            typeToken
         )
-        return jsonObject.toMap()
     }
 
     /**
@@ -39,6 +38,7 @@ object MapUtils {
      * @return 转换后的 JSON 字符串。
      */
     fun mapToJsonString(map: Map<*, *>): String {
-        return JSONObject(map).toString()
+        val gson = Gson()
+        return gson.toJson(map)
     }
 }
